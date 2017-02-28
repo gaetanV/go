@@ -1,10 +1,12 @@
 package main
+import "fmt"
 ////////////////////////
 type Appliance interface{
     Push(interface{}) 
 }
 type ArrayInt struct{
      c []int
+     size int
 }
 
 func (this *ArrayInt)Push(a interface{}){
@@ -15,6 +17,7 @@ func (this *ArrayInt)Push(a interface{}){
 }
 type ArrayString struct{
      c []string
+     name string
 }
 
 func (this *ArrayString)Push(a interface{}){
@@ -29,9 +32,11 @@ func ArrayList(a interface{}) Appliance {
         switch v := a.(type) {
 		case []string:  
                     b := new(ArrayString)
+                    b.name = "welcome"
                     b.c = v
 		case []int:
                     b := new(ArrayInt)
+                    b.size = 4
                     b.c = v
 	}
         return b
@@ -42,4 +47,5 @@ func main() {
       b := ArrayList([]int{4})
       a.Push("v");
       b.Push(5);
+   
 }
