@@ -7,11 +7,34 @@ type AString []string
 type stringArray interface {
     join(string) string
     pop() string
+    indexOf(string) int
     push(args ...interface{}) int
-    Map(func(int,string)string) *AString
-    Filter(func(int,string)bool) *AString
+    Map(func(mapType)string) *AString
+    Filter(func(filterType)bool) *AString
 }
 
+
+////////////////////////////////
+type mapType struct{
+    i int
+    val string
+    table []string
+}
+
+type filterType struct{
+    i int
+    val string
+    table []string
+}
+////////////////////////////////
+func (this *AString) indexOf(a string) int{
+    for i,v := range *this {
+        if v == a {
+            return i
+        }  
+     }
+    return -1 
+}
 ////////////////////////////////
 func (this *AString) pop() string{
      a := *this
@@ -30,19 +53,18 @@ func (this *AString) push(args ...interface{}) int{
      return len(*this)
 }
 ////////////////////////////////
-func (this *AString) Map(a func(int,string)string) *AString{
+func (this *AString) Map(a func(mapType)string) *AString{
      d := *this
      for i,v := range d {
-	  d[i] = a(i,v)
+	  d[i] = a(mapType{i:i,val:v,table:d})
      }
      return this
 }
 
-func (this *AString) Filter(a func(int,string)bool) *AString{
+func (this *AString) Filter(a func(filterType)bool) *AString{
      d := []string{}
-     fmt.Println(d)
      for i,v := range *this {
-          if a(i,v) {
+          if a(filterType{table:d,val:v,i:i}) {
              d = append(d,v)
           }
      }
@@ -72,25 +94,30 @@ func ArrayString(args ...interface{}) stringArray {
     }
     return stringArray(a) 
 }
+
+
+
 ////////////////////////
 func main() {
       a := ArrayString("a","b")
       r1 := a.push("c","e")
-
+      fmt.Println(a.indexOf("e"))
       fmt.Println(r1)
       fmt.Println(a.join(","))
       r2 := a.pop()
       fmt.Println(r2)
       fmt.Println(a) 
 
-      c := func(i int,v string)string{
-      	return v + "_super"
+      c := func(this mapType)string{
+      	return this.val + "_super"
       }
-      d := func(i int,v string)bool{
-      	return v == "a_super"
+      d := func(this filterType)bool{
+      	return this.val == "a_super"
       }
-      fmt.Println(a)
-      a.Map(c).Filter(d)
 
+      a.Map(c)
+      fmt.Println(a)
+      a.Filter(d)
     
+      fmt.Println(a)
 }
