@@ -23,7 +23,7 @@ func (this *PrivateClass)getPublic() string{
 }
 
 func PrivateBuild() Private{
-    a := new(PrivateClass)
+    var a *PrivateClass = new(PrivateClass)
     b := map[string]string{}
     b ["wait"] = "privateKey"
 
@@ -39,12 +39,12 @@ func PrivateBuild() Private{
     a.setPrivate = setPrivate
 
     a.public = "publicKey"
-    return  a
+    return a
 }
 
 ////////////////////////
 func main() {
-    a := PrivateBuild()
+    var a Private = PrivateBuild()
     fmt.Println(a)
     fmt.Println(a.getPublic())
 }
