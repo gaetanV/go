@@ -4,6 +4,22 @@ import "fmt"
 
 type AString []string
 
+type stringIterator struct {
+    table stringArray
+    pointer int
+}
+
+func (this *stringIterator) next() (bool,string){
+    done := false
+    if this.pointer == this.table.length() -1 {
+        done = true
+        this.pointer = 0
+    } else {
+        this.pointer  ++
+    }
+    return  done ,  this.table.get(this.pointer)
+}
+
 type stringArray interface {
 
     pop() string
@@ -11,15 +27,16 @@ type stringArray interface {
     push(args ...interface{}) int
     unshift(args ...interface{}) int
 
+    get(int) string
     indexOf(string) int
     join(string) string
+    length() int
+    values() stringIterator
 
     Map(func(mapType)string) *AString
     Filter(func(filterType)bool) *AString
     
 }
-
-
 ////////////////////////////////
 type mapType struct{
     i int
@@ -40,6 +57,31 @@ func (this *AString) indexOf(a string) int{
         }  
      }
     return -1 
+}
+func (this *AString) length() int{
+    a := *this
+    return len(a)
+}
+
+func (this *AString) get(index int) string{
+    a := *this
+    return a[index]
+}
+
+func (this *AString) values() stringIterator{
+   
+    return stringIterator{table:this,pointer:0} 
+}
+
+func (this *AString) join(a string) string{
+     var r string = ""
+     for i,v := range *this {
+          if i != 0 {
+              r += a 
+          }
+          r += v
+     }
+    return r
 }
 ////////////////////////////////
 func (this *AString) pop() string{
@@ -97,18 +139,6 @@ func (this *AString) Filter(a func(filterType)bool) *AString{
      return this
 }
 ////////////////////////////////
-
-func (this *AString) join(a string) string{
-     var r string = ""
-     for i,v := range *this {
-          if i != 0 {
-              r += a 
-          }
-          r += v
-     }
-    return r
-}
-
 func ArrayString(args ...interface{}) stringArray {
     a := new(AString)
     for _, item := range args {
@@ -120,13 +150,18 @@ func ArrayString(args ...interface{}) stringArray {
     return stringArray(a) 
 }
 
-
-
 ////////////////////////
 func main() {
+   
       a := ArrayString("a","b")
+
+      d1 := a.values()
+     
+       
       r1 := a.push("c","e")
       a.unshift("45","21")
+       fmt.Println(d1.next())
+  
       fmt.Println(a)
       r3 := a.shift()
       fmt.Println(r3)
