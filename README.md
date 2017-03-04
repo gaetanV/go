@@ -7,10 +7,11 @@
  *  sequence        : sequence , sequence<string>
  *  pattern         : factory , promise , singleton
  *  accessibility   : private
+ *  string          : Map , EscapeHtml , Replace
  *
  * (c) Gaetan Vigneron <gaetan@webworkshops.fr>
  *  V 0.0.6
- *  04/03/2017
+ *  05/03/2017
  *  
  **/
 ```
