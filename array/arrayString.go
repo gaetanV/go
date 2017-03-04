@@ -5,12 +5,18 @@ import "fmt"
 type AString []string
 
 type stringArray interface {
-    join(string) string
+
     pop() string
-    indexOf(string) int
+    shift() string
     push(args ...interface{}) int
+    unshift(args ...interface{}) int
+
+    indexOf(string) int
+    join(string) string
+
     Map(func(mapType)string) *AString
     Filter(func(filterType)bool) *AString
+    
 }
 
 
@@ -41,6 +47,25 @@ func (this *AString) pop() string{
      var d string = a[len(a)-1]
      *this = a[:len(a)-1]
      return d
+}
+
+func (this *AString) shift() string{
+     a := *this
+     var d string = a[0]
+     *this = a[1:]
+     return d
+}
+
+func (this *AString) unshift(args ...interface{}) int{
+    r := []string{}
+    for _, item := range args {
+         switch v := item.(type) {
+             case string:
+                  r = append(r, v)
+         }
+     }
+     *this = append( r,*this...)
+     return len(*this)
 }
 
 func (this *AString) push(args ...interface{}) int{
@@ -101,6 +126,12 @@ func ArrayString(args ...interface{}) stringArray {
 func main() {
       a := ArrayString("a","b")
       r1 := a.push("c","e")
+      a.unshift("45","21")
+      fmt.Println(a)
+      r3 := a.shift()
+      fmt.Println(r3)
+      fmt.Println(a)
+
       fmt.Println(a.indexOf("e"))
       fmt.Println(r1)
       fmt.Println(a.join(","))
