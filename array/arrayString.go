@@ -1,9 +1,8 @@
 package main
 ////////////////////////
 import "fmt"
-
-type AString []string
-
+////////////////////////////////
+////////////////////////////////
 type stringIterator struct {
     table stringArray
     pointer int
@@ -19,6 +18,46 @@ func (this *stringIterator) next() (bool,string){
     }
     return  done ,  this.table.get(this.pointer)
 }
+
+func (this *stringIterator) Index(i int) *stringIterator{
+    if i < this.table.length() && i > 0 {
+         this.pointer = i
+    } 
+    return this
+}
+
+func (this *stringIterator) Print() (int,string){
+    return  this.pointer , this.table.get(this.pointer)
+}
+
+func (this *stringIterator) Next() *stringIterator{
+    if this.pointer == this.table.length() -1 {
+        fmt.Println("new cycle")
+        this.pointer = 0
+    } else {
+        this.pointer  ++
+    }
+    return  this 
+}
+
+func (this *stringIterator) Done() bool{
+    return  this.pointer == 0
+}
+
+func (this *stringIterator) Prev() *stringIterator{
+    if this.pointer != 0 {
+        this.pointer --
+    } else {
+        fmt.Println("new cycle")
+        this.pointer = this.table.length() - 1
+    }
+    return  this 
+}
+
+////////////////////////////////
+////////////////////////////////
+
+type AString []string
 
 type stringArray interface {
 
@@ -160,8 +199,13 @@ func main() {
        
       r1 := a.push("c","e")
       a.unshift("45","21")
-       fmt.Println(d1.next())
-  
+      fmt.Println(d1.next())
+      _ , c2 := d1.Next().Next().Print()
+      fmt.Println(c2) 
+      _ , c3 := d1.Index(1).Print()
+      fmt.Println(c3) 
+
+
       fmt.Println(a)
       r3 := a.shift()
       fmt.Println(r3)

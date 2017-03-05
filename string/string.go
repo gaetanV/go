@@ -1,28 +1,24 @@
 package main
 ////////////////////
 import "fmt"
-
+import "time"
 ////////////////////////////////
 func Map( callback func(rune)(string),val string) string{
 
+    //  Time                       834175800       
+
      var start int = 0
      var pt int = 0
-     var max int = len(val) 
-     /*--------------------------------------------------------------
-     *  Other possibility : 
-     *  length := 0
-     *  max := len(val)*2 ==> hard allocation
-     ---------------------------------------------------------------*/
+     var max int = len(val)
      var w int = 0
+       for _, a := range val {
+       d := callback(a)
+        if d != "@nil"  {
+          max += len(d)
+       }
+      }
      t:= make([]byte, max)
      add := func (char string) {
-        /*--------------------------------------------------------------
-        *  length + = len(char)
-        *  if start + length > max {
-        *        t =  append(t,make([]byte, max + len(val)*2)   
-        *  }
-        ---------------------------------------------------------------*/
-        t =  append(t,make([]byte, max + len(char))...)   
         w += copy(t[w:],val[pt:start])
         w += copy(t[w:],char)
         pt = start + 1
@@ -37,76 +33,48 @@ func Map( callback func(rune)(string),val string) string{
     w += copy(t[w:],val[pt:start])
     return  string(t[0:w])
 }
-
-func Replace( a []rune, b []string ,s string)string {
-    /************** 
-    /* TODO : no hard allocation (args)
-    **************/
-    l :=  len(s)
-    tmp := []int{}
-    for i, c := range s {
-        for j, d := range a { 
-            if c == d {
-                tmp = append(tmp,i)
-                tmp = append(tmp,j)
-                l += len(d)
-            }
-        }
-    }
-    t:= make([]byte, l)
-    var w int = 0
-    var m int = 0 
-    for i := 0; i < len(tmp); i+=2 {
-         w += copy(t[w:],s[m:tmp[i]]) 
-         w += copy(t[w:],b[tmp[i+1]])
-         m = tmp[i]
-         m ++
-    }
-    w += copy(t[w:],s[m:len(s)])
-    return  string(t[0:w])
-    
-}
-
-
 func EscapeHtml(s string)string {
+
+    // Time               553639800 
+
     a :=  len(s)
-    /***************
-    * Opti Case ==> hard allocation with a Tampon (dynamic int slice)
-    *****************/
-    tmp := []int{}
-    val := [5]string{"&#34;","&amp;","&#39;","&lt;","&gt;"}
-    for i, c := range s {
+    for _, c := range s {
         switch  c {
                     case 34 : 
-                       tmp = append(tmp,i)
-                       tmp = append(tmp,0)
                        a += 5
                     case 38 : 
-                       tmp = append(tmp,i) 
-                       tmp = append(tmp,1)
                        a += 5
                     case 92 : 
-                       tmp = append(tmp,i) 
-                       tmp = append(tmp,2) 
                        a += 5
                     case 60 :
-                       tmp = append(tmp,i) 
-                       tmp = append(tmp,3) 
                        a += 4
                     case 62 : 
-                       tmp = append(tmp,i) 
-                       tmp = append(tmp,4) 
                        a += 4
         }
     }
     t:= make([]byte, a)
     var w int = 0
     var m int = 0 
-    for i := 0; i < len(tmp); i+=2 {
-         w += copy(t[w:],s[m:tmp[i]])
-         w += copy(t[w:],val[tmp[i+1]])
-         m = tmp[i]
+    add := func(val string,pointer int){
+         w += copy(t[w:],s[m:pointer])
+         w += copy(t[w:],val)
+         m = pointer
          m ++
+    }
+    for i, c := range s {
+        switch  c {
+                    case 34 : 
+                      add("&#34",i)
+                    case 38 : 
+                      add("&amp;",i)
+                    case 92 : 
+                      add("&#39;",i)
+                    case 60 :
+                      add("&lt;",i)
+                    case 62 : 
+                      add("&gt;",i)
+        }
+       
     }
     w += copy(t[w:],s[m:len(s)])
     return  string(t[0:w])
@@ -114,25 +82,45 @@ func EscapeHtml(s string)string {
 ////////////////////////////////
 
 func main() {
-      escapeHtml := func(a rune)(string){
-            switch a {
-                    case 34 : 
-                        return "&#34;"
-                    case 38 : 
-                        return "&amp;"
-                    case 92 : 
-                        return "&#39;"
-                    case 60 : 
-                        return "&lt;"
-                    case 62 : 
-                        return "&gt;"
+      var t1 int64
+      limit := 2000000
+      var c1 int64 = 0
+      var c2 int64 = 0
+      var i int
+
+    i = 0
+    for { 
+            if i >= limit { break }  
+            i ++
+            t1 = time.Now().UnixNano()
+            EscapeHtml(" < a > oink & oink & oink")
+            c2 += time.Now().UnixNano()-t1
+    }
+    fmt.Println(c2) 
+
+    i = 0
+    for { 
+            if i >= limit { break }  
+            i ++
+            t1 = time.Now().UnixNano()
+            escapeHtml := func(a rune)(string){
+                  switch a {
+                          case 34 : 
+                              return "&#34;"
+                          case 38 : 
+                              return "&amp;"
+                          case 92 : 
+                              return "&#39;"
+                          case 60 : 
+                              return "&lt;"
+                          case 62 : 
+                              return "&gt;"
+                  }
+                  return "@nil"
             }
-            return "@nil"
-      }
-      a := Map( escapeHtml ," < a > oink & oink & oink") 
-      fmt.Println(a) 
-      c := Replace( []rune{34,38,92,60,62} ,[]string{"&#34;","&amp;","&#39;","&lt;","&gt;"} ," < a > oink & oink & oink") 
-      fmt.Println(c)
-      fmt.Println(EscapeHtml(" < a > oink & oink & oink")) 
-  
+            Map( escapeHtml ," < a > oink & oink & oink")
+            c1 += time.Now().UnixNano()-t1
+             
+    } 
+    fmt.Println(c1) 
 }
