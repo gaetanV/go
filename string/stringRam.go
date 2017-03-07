@@ -5,7 +5,7 @@ import "time"
 ////////////////////
 ///////////////////////////////
 const replaceByteExtra = 50
-const replaceInt = 8 // => 4 replace
+const replaceInt = 8 
 
 func EscapeHtmlPredict(s string)string {
 

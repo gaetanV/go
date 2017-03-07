@@ -4,7 +4,7 @@
  *
  *  array<string>   : pop , push , unshift , shift , indexOf , join , Map , Filter , values
  *  array<int>      : Reduce , Some , Sort
- *  string          : Map , EscapeHtml , Replace (  )
+ *  string          : Map , EscapeHtml 
  *  pattern         : factory , singleton , private
  *  sequence        : sequence , promise 
  *
