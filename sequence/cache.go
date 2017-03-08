@@ -36,8 +36,17 @@ func (this *AString) push(v string) int {
             this.rEnd = end
             s1 = end
         }else {
-            this.rEnd = this.rEnd + length
-            s1 = this.rEnd
+            b := this.rEnd + length
+            if ( b > ramLength) {
+               *this.follow = 0
+                copy(this.ram[*this.follow:],this.ram[this.rStart:this.rEnd])
+                this.rStart = 0
+                this.rEnd = length
+                this.rPointer = *this.follow + this.pointer
+            }else{
+               this.rEnd =b
+               *this.follow = this.rEnd
+            }
         }
     }
     this.rPointer += copy(ram[this.rPointer:],v) 

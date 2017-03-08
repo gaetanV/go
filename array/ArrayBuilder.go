@@ -1,21 +1,18 @@
 package main
 ////////////////////////
 import "fmt"
-//import "time"
+import "time"
+const ramLength = 5000
 
-const ramLength = 50000
-var ramString [ramLength]string = [ramLength]string{}
-var ramInt [ramLength]int = [ramLength]int{}
-var sString int = 0 
-var sInt int = 0 
 
+///////////////////////////////////////
 
 type ArrayIntInterface interface {
   push(int)
 }
 
-
 type AInt struct {
+    ramLength *int
     rStart int
     rPointer int
     rEnd int
@@ -41,8 +38,17 @@ func (this *AInt) push(v int)  {
             this.rEnd = end
             *this.follow = end
          }else {
-            this.rEnd = this.rEnd + length
-            *this.follow = this.rEnd
+            b := this.rEnd + length
+            if ( b > ramLength) {
+               *this.follow = 0
+                copy(this.ram[*this.follow:],this.ram[this.rStart:this.rEnd])
+                this.rStart = 0
+                this.rEnd = length
+                this.rPointer = *this.follow + this.pointer
+            }else{
+               this.rEnd =b
+               *this.follow = this.rEnd
+            }
          }
     }
     this.ram[this.rPointer] = v
@@ -50,9 +56,11 @@ func (this *AInt) push(v int)  {
     this.pointer ++     
 }
 
+///////////////////////////////////////
 
 type ArrayStringInterface interface {
     push(string) 
+    join(string) string
 }
 
 type AString struct {
@@ -61,8 +69,10 @@ type AString struct {
     rEnd int
     step int
     len int
+    strlen int
     pointer int
     follow *int
+    ramLength *int
     ram *[ramLength]string
 }
 
@@ -76,81 +86,149 @@ func (this *AString) push(v string)  {
             if b > ramLength {
                 *this.follow = 0
             }
+          
             end := b    
             copy(this.ram[*this.follow:],this.ram[this.rStart:this.rEnd]) 
             this.rStart = *this.follow 
             this.rEnd = end
             *this.follow = end
          }else {
-            this.rEnd = this.rEnd + length
-            *this.follow = this.rEnd
+            b := this.rEnd + length
+            if (b > ramLength) {
+               *this.follow = 0
+                copy(this.ram[*this.follow:],this.ram[this.rStart:this.rEnd])
+                this.rStart = 0
+                this.rEnd = length
+                this.rPointer = *this.follow + this.pointer
+            }else{
+               this.rEnd =b
+               *this.follow = this.rEnd
+            }
          }
     }
+    this.strlen += len(v)
     this.ram[this.rPointer] = v
     this.rPointer++
     this.pointer ++     
 }
 
-type ArrayBuilder struct {}
+func (this *AString) join(a string) string {   
 
-func (this *ArrayBuilder) int(length int) ArrayIntInterface {
-    b := sInt + length 
+     /// 247127700
+     
+     t:= make([]byte, this.strlen + (this.len*len(a)))
+     j:=0
+     j +=  copy(t[j:],this.ram[this.rStart])
+     for i:=this.rStart+1 ; i < this.rPointer ; i++ {
+              j +=  copy(t[j:],a)
+              j +=  copy(t[j:],this.ram[i])
+     
+     }
+     return  string(t[:j])
+}
+
+///////////////////////////////////////
+
+
+type ArrayBuilderInterface interface {
+    string(int) ArrayStringInterface
+    int(int) ArrayIntInterface
+}
+
+type ArrayBuild struct {
+    ramString [ramLength]string
+    ramInt [ramLength]int
+    sString int
+    sInt int
+}
+
+
+func (this *ArrayBuild) int(length int) ArrayIntInterface {
+    b := this.sInt + length 
     if b > ramLength {
-        sInt = 0
+        this.sInt = 0
     }
     a := new(AInt)
     a.step = length
     a.len = length
-    a.rStart   = sInt
-    a.rPointer = sInt
+    a.rStart   = this.sInt
+    a.rPointer = this.sInt
     a.pointer = 0 
     a.rEnd   = b
-    a.follow = &sInt
-    a.ram = &ramInt
-    sInt = b
+    a.follow = &this.sInt
+    a.ram = &this.ramInt
+    this.sInt = b
     return (a)
 }
 
-
-func (this *ArrayBuilder) string(length int) ArrayStringInterface {
-    b := sString + length 
+func (this *ArrayBuild) string(length int) ArrayStringInterface {
+    b := this.sString + length 
     if b > ramLength {
-        sString = 0
+        this.sString = 0
     }
     a := new(AString)
     a.step = length
     a.len = length
-    a.rStart   = sString
-    a.rPointer = sString
+    a.rStart   = this.sString
+    a.rPointer = this.sString
     a.pointer = 0 
     a.rEnd   = b
-    a.follow = &sString
-    a.ram = &ramString
-    sString = b
+    a.strlen = 0
+    a.follow = &this.sString
+    a.ram = &this.ramString
+    this.sString = b
     return (a)
 }
 
+
+func ArrayBuilder(length int) ArrayBuilderInterface{
+        a:=  new(ArrayBuild)
+        a.ramString  = [ramLength]string{}
+        a.ramInt  = [ramLength]int{}
+        a.sString = 0
+        a.sInt = 0
+        return (a)
+}
+
+///////////////////////////////////////
+
 func main() {
-    a:= new(ArrayBuilder) 
-    d:= a.string(1)
-    c:= a.string(1)
-    c.push("go c")
+
+    a:= ArrayBuilder(700)
+
     b:= a.string(2)
-    b.push("hello world")
-    d.push("c++")
-    b.push("hello world")
-    b.push("hello world")
-    c.push("go c")
 
-    d.push("c++")
-    d.push("c++")
+    b.push("hello world")
+    b.push("hello world")
+    b.push("go go")
+    fmt.Println(b.join(" , ")) 
+
+    var t1 int64
+   limit := 2000000
+   // var c1 int64 = 0
+   // var c2 int64 = 0
+   var c3 int64 = 0
+    var i int
+
+
+ 
+    /// 155989100
+    /// 149714600
+    i = 0
+ 
+    a.string(500)
+    for {
+            if i >= limit { break }  
+            i ++
+            t1 = time.Now().UnixNano()
+            r:= a.string(25)
+            r.push("c++ sqdsqdsq azdzd azda zad zazdz adaz zd az dzd ")
+        
+            c3 += time.Now().UnixNano()-t1
+             
+    } 
+    fmt.Println(c3) 
+
     
-
-    e:= a.int(1)
-    e.push(45)
-    e.push(555)
-    e.push(2)
-    fmt.Println(ramInt[0:50]) 
-    fmt.Println(ramString[0:50]) 
 
 }

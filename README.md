@@ -2,15 +2,16 @@
 /**
  *  GO / Javascript / Collection 
  *
- *  array<string>   : pop , push , unshift , shift , indexOf , join , Map , Filter , values
- *  array<int>      : Reduce , Some , Sort
+ *  ArrayBuilder
+ *  [i]string       : pop , push , unshift , shift , indexOf , join , Map , Filter , values
+ *  [i]int          : Reduce , Some , Sort
  *  string          : Map , EscapeHtml 
  *  pattern         : factory , singleton , private
- *  sequence        : sequence , promise 
+ *  sequence        : sequence , promise , cache
  *
  * (c) Gaetan Vigneron <gaetan@webworkshops.fr>
- *  V 0.0.6
- *  05/03/2017
+ *  V 0.0.7
+ *  08/03/2017
  *  
  **/
 ```  
