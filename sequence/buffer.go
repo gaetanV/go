@@ -1,120 +1,141 @@
 package main
-////////////////////////
+
 import "fmt"
 import "time"
+////////////////////////////
 
-const ramLength = 50000
-var ram [ramLength]byte = [ramLength]byte{}
-var s1 int = 0 
-
-type ArrayStringInterface interface {
-    push(string) int
-}
-
-type AString struct {
-    rStart int
-    rEnd int
-    rPointer int
+type Part struct {
+    uid int
+    pEnd int
+    lock bool 
+    tampon []byte
+    buffer *Buffer
+    length int
     step int
-    len int
-    pointer int
 }
 
-func (this *AString) push(v string) int {
-    if this.rPointer + len(v) >= this.rEnd {      
-        length :=  this.len + this.step
-        this.len = length
-        if s1 != this.rEnd {
-            b := s1 + length
-            this.rPointer = s1 + this.pointer
-            if b > ramLength {
-                s1 = 0
-            }
-            end := b    
-            copy(ram[s1:],ram[this.rStart:this.rEnd]) 
-            this.rStart = s1 
-            this.rEnd = end
-            s1 = end
-        }else {
-            b := this.rEnd + length
-            if ( b > ramLength) {
-               *this.follow = 0
-                copy(this.ram[*this.follow:],this.ram[this.rStart:this.rEnd])
-                this.rStart = 0
-                this.rEnd = length
-                this.rPointer = *this.follow + this.pointer
-            }else{
-               this.rEnd =b
-               *this.follow = this.rEnd
-            }
-        }
-    }
-    this.rPointer += copy(ram[this.rPointer:],v) 
-    this.pointer ++     
-    return this.len 
+type PartInterface interface {
+    push(string) 
+    resolve()
 }
 
-func ArrayString(length  int) ArrayStringInterface {
-    b := s1 + length 
-    if b > ramLength {
-        s1 = 0
+func (this *Part) push (a string) {
+    length := this.pEnd + len(a)
+    if  length > this.length {
+         extend := length + this.step
+         t:= make([]byte, extend)
+         copy(t[0:],this.tampon[0:]);
+         this.tampon = t
+         this.length = extend
     }
-    a := new(AString)
-    a.rStart   = s1
-    a.rEnd   = b
-    a.step = length
-    a.len = length
-    a.rPointer = s1
-    a.pointer = 0 
-    s1 = b
+    if !this.lock {
+        this.pEnd += copy(this.tampon[this.pEnd:],a);
+    }
+ 
+    
+}
+func (this *Part) resolve () {
+    this.buffer.resolve(this.uid)
+    this.lock = true
+}
+
+func (this *Part) getLength() int{
+    return this.pEnd
+}
+
+
+func (this *Part) getTampon() []byte{
+    a := make([]byte,this.pEnd)
+    copy(a[0:],this.tampon[0:this.pEnd])
+    return a
+}
+
+
+type Buffer struct {
+    parts   []*Part
+    uid int
+    nbPart  int
+    nbPartDone  int
+    promise func(string)
+    
+}
+
+type BufferInterface interface {
+    part(int) PartInterface
+    resolve(int)
+    
+}
+
+
+func (this *Buffer) part(length int) PartInterface{
+    if this.uid > this.nbPart {
+         fmt.Println("end of distribution")
+    } 
+    a := new(Part)
+    a.uid    = this.uid
+    a.length = length
+    a.step   = length
+    a.lock   = false
+    a.tampon = make([]byte,length)
+    a.buffer = this
+    this.parts[this.uid] = a
+    this.uid ++
+    
+    return a
+}
+
+func (this *Buffer) resolve(a int){
+    this.nbPartDone ++ 
+    if this.nbPartDone >= this.nbPart {
+          l := 0
+          for i:=0; i<this.nbPart ; i++ {
+             l +=this.parts[i].getLength()
+          } 
+          r := make([]byte,l)
+          w := 0
+          
+          for i:=0; i<this.nbPart ; i++ {
+           
+             w += copy(r[w:],this.parts[i].getTampon())
+          }
+          this.promise(string(r))
+    }
+}
+
+func buffer(nbPart int,promise func(string)) BufferInterface{
+    a := new(Buffer)
+    a.parts = make([]*Part,nbPart)
+    a.promise = promise
+    a.nbPart = nbPart
     return (a)
 }
 
+////////////////////////////////
 
-////////////////////////
-// 3079162600 Args
-// 557451100  String
-///////////////////////
+func thread2(a PartInterface){
+  
+    a.push("<ul>")
+    for i:=0;  i<5 ; i++ {
+        a.push("<li>c</li>")
+    }
+    a.push("</ul>")
+    a.resolve()
+}
+
+func thread(a PartInterface){
+    time.Sleep(time.Second * 1)
+    a.push("<h1>Title</h1>")
+    a.resolve()
+}
 
 func main() {
 
-    var t1 int64
-    limit := 2000000
-    var c1 int64 = 0
-
-    var i int
-
-    i = 0
-    for { 
-
-        if i >= limit { break }  
-        i ++
-        t1 = time.Now().UnixNano()
-        a := ArrayString(25)
-        a.push("caa")
-        a.push("cadda")
-        a.push("daa")
-
-        c := ArrayString(3)
-        c.push("aa")
-        c.push("add")
-        c.push("a")
-
-        b := ArrayString(2)
-        b.push("c")
-        b.push("c")
-        b.push("d")
-        b.push("e")
-        b.push("e")
-        b.push("e")    
-        c.push("e")
-        c.push("aaa")
-        c.push("e")    
-        c.push("e")
-        c.push("e")
-        c.push("e")
-        c1 += time.Now().UnixNano()-t1
-    } 
-    fmt.Println(c1) 
-    fmt.Println(ram[0:1000])
+    a:= buffer( 2 , func(r string){
+            fmt.Println(r)
+    })
+  
+    go  thread  (a.part(50))
+    go  thread2 (a.part(20))
+    
+    time.Sleep(time.Second * 20)
 }

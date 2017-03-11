@@ -4,18 +4,12 @@ import "fmt"
 import "time"
 import "sort"
 
-
 ////////////////////////
-// Array strategy
-// Array fixe prediction [1/3]
+// Array  prediction [1/3]
 // No strategy [<3]
 ////////////////////////
 
-const ramLength = 6
 const strategyLength = 3
-const ramStrategy = ramLength / strategyLength
-
-///////////////////////////////////////
 
 type ArrayNumericInterface interface {
   push(int)
@@ -32,7 +26,7 @@ type AInt struct {
     len int
     strlen int
 
-    ram [ramLength]int
+    ram []int
 }
 
 
@@ -55,12 +49,10 @@ func (this *AInt) Sort(a func(int,int)int){
         b[j] = cmp
         j ++
      }
-     c :=  make([]int,j)
      sort.Ints(b)
      for _, k := range b {
-        c[k] = r[k]
+        this.ram[this.pStart + k] = r[k]
      }
-     copy(this.ram[this.pStart:],c)
      fmt.Println(this.ram) 
 
 }
@@ -137,7 +129,7 @@ type AString struct {
     len int
     strlen int
 
-    ram [ramLength]string
+    ram []string
 }
 
 func (this *AString) length() int  {
@@ -282,46 +274,40 @@ func (this *AString) Filter(a func(mapStringType)bool){
 ///////////////////////////////////////
 
 
-func ArrayStringBuilder() ArrayStringInterface{
-       
+func ArrayStringBuilder(ramLength int ) ArrayStringInterface{
+
+    ramStrategy := ramLength / strategyLength
     a := new(AString)
 
-    a.len      = 0
-    a.rEnd     = ramLength
-    a.pEnd = ramStrategy
-    a.pStart   = ramStrategy
-    a.strlen   = 0
-    a.ram      = [ramLength]string{}
-
-    return (a)
-}
-
-
-func ArrayIntBuilder() ArrayNumericInterface{
-       
-    a := new(AInt)
-
-    a.len      = 0
     a.rEnd     = ramLength
     a.pEnd     = ramStrategy
     a.pStart   = ramStrategy
-    a.ram      = [ramLength]int{}
+    a.ram      = make( []string,ramLength)
+    return (a)
+}
+
+
+func ArrayIntBuilder(ramLength int ) ArrayNumericInterface{
+
+    ramStrategy := ramLength / strategyLength
+    a := new(AInt)
+
+    a.rEnd     = ramLength
+    a.pEnd     = ramStrategy
+    a.pStart   = ramStrategy
+    a.ram      = make([]int,ramLength)
 
     return (a)
 }
 
 
-
-///////////////////////////////////////
-//  20514000
-///////////////////////////////////////
 func main() {
 
     t1 := time.Now().UnixNano()
 
 
     fmt.Println("-------NUMERIC------")
-    a:= ArrayIntBuilder()
+    a:= ArrayIntBuilder(6)
     a.push(4)
     a.push(3)
 
@@ -340,7 +326,7 @@ func main() {
       	 return c - v
     })
     
-    b:= ArrayStringBuilder()
+    b:= ArrayStringBuilder(6)
 
     b.push("p1")
     b.push("p2")

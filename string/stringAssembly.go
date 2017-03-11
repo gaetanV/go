@@ -9,9 +9,9 @@ const nbBloc = ramLength/ramBloc
 
 ////////////////////////
 
-type ArrayStringInterface interface {
+type partInterface interface {
     push(string) 
-    join(string) string
+   
     log() 
 }
 
@@ -26,7 +26,7 @@ type AString struct {
     strlen int
     pointer int
 
-    ram *[ramLength]string
+    ram *[ramLength]byte
     extend func()
 }
 
@@ -44,43 +44,30 @@ func (this *AString) log()  {
 }
 
 func (this *AString) push(v string)  {
-        if this.rPointer + 1  > this.rEnd {
+        if this.rPointer + len(v)  > this.rEnd {
             this.extend()
         }
         this.strlen += len(v)
-        this.ram[this.rPointer] = v
-        this.rPointer++
+        copy(this.ram[this.rPointer:],v)
        
-        this.pointer ++   
+        this.rPointer+=len(v)
+       
+        this.pointer +=len(v)   
         //this.log()  
 }
 
-func (this *AString) join(a string) string {   
 
-     /// 247127700
-     
-     t:= make([]byte, this.strlen + (this.len*len(a)))
-     j:=0
-     j +=  copy(t[j:],this.ram[this.rStart])
-     for i:=this.rStart+1 ; i < this.rPointer ; i++ {
-              j +=  copy(t[j:],a)
-              j +=  copy(t[j:],this.ram[i])
-     
-     }
-     return  string(t[:j])
-}
 
 ///////////////////////////////////////
 
 
-type ArrayBuilderInterface interface {
-    string() ArrayStringInterface
+type BufferInterface interface {
+    part() partInterface
 
 }
 
-type ArrayBuild struct {
-    ramString [ramLength]string
-    ramInt [ramLength]int
+type Buffer struct {
+    ramString [ramLength]byte
     sString int
     sInt int
     cmp int
@@ -96,7 +83,7 @@ type ArrayBuild struct {
 
 
 
-func (this *ArrayBuild) string() ArrayStringInterface {
+func (this *Buffer) part() partInterface {
     b := this.sString + this.length 
     if b > ramLength {
        fmt.Println("index out of range")
@@ -155,26 +142,23 @@ func (this *ArrayBuild) string() ArrayStringInterface {
                   
              }
              a.rBloc    = this.cmp
-             
              a.rEnd     = endForce
-            
-             fmt.Println(this.ramString[a.rStart:a.rEnd]) 
+             fmt.Println(stringthis.ramString[a.rStart:a.rEnd]) 
         }   
 
     }
-
   
     this.sString = b 
     return (a)
 }
 
 
-func ArrayBuilder() ArrayBuilderInterface{
+func buffer() BufferInterface{
       
-        a:=  new(ArrayBuild)
+        a:=  new(Buffer)
         a.length        =  ramBloc
-        a.ramString     = [ramLength]string{}
-        a.ramInt        = [ramLength]int{}
+        a.ramString     = [ramLength]byte{}
+
         a.sString       = 0
         a.sInt          = 0
         a.sPartString   = 0
@@ -221,14 +205,14 @@ func ArrayBuilder() ArrayBuilderInterface{
 
 func main() {
 
-    a:= ArrayBuilder()
+    a:= buffer()
 
-    b:= a.string()
+    b:= a.part()
     b.push(`b1`)
     b.push("b2")
     b.push("b3")
     
-    c:= a.string()
+    c:= a.part()
     c.push("c1")
 
     b.push("b4")
@@ -241,8 +225,7 @@ func main() {
     c.push("c4")
     b.push(`b7`)
     b.push("bc4")
-    fmt.Println(b.join(" , ")) 
-    fmt.Println(c.join(" , "))
+
 
    
 }
