@@ -10,8 +10,8 @@
  *  sequence        : sequence , promise , cache
  *
  * (c) Gaetan Vigneron <gaetan@webworkshops.fr>
- *  V 0.0.7
- *  08/03/2017
+ *  V 0.0.8
+ *  11/03/2017
  *  
  **/
 ```  
