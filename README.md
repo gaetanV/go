@@ -7,8 +7,8 @@
  *  [i]numeric      : Reduce , Some , Sort
  *  string          : Map , EscapeHtml 
  *  stringOpti      : assembly , ram
- *  pattern         : factory , singleton , private
- *  sequence        : sequence , promise , buffer
+ *  pattern         : factory , singleton , private , sequence , promise 
+ *  sequence        : cacheFiles , buffer
  *
  * (c) Gaetan Vigneron <gaetan@webworkshops.fr>
  *  V 0.0.9

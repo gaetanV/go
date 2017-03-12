@@ -143,7 +143,7 @@ func (this *Buffer) part() partInterface {
              }
              a.rBloc    = this.cmp
              a.rEnd     = endForce
-             fmt.Println(stringthis.ramString[a.rStart:a.rEnd]) 
+             fmt.Println(string(this.ramString[a.rStart:a.rEnd]) )
         }   
 
     }
