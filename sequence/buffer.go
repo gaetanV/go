@@ -1,7 +1,9 @@
 package main
+import (
+    "time"
+    "fmt"
+)
 
-import "fmt"
-import "time"
 ////////////////////////////
 
 type Part struct {
@@ -95,7 +97,6 @@ func (this *Buffer) resolve(a int){
           w := 0
           
           for i:=0; i<this.nbPart ; i++ {
-           
              w += copy(r[w:],this.parts[i].getTampon())
           }
           this.promise(string(r))
